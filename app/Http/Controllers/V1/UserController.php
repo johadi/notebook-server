@@ -2,84 +2,59 @@
 
 namespace App\Http\Controllers\V1;
 
-use Illuminate\Http\Request;
+use App\Models\User;
 use App\Http\Controllers\Controller;
+use Auth;
 
 class UserController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function index()
+    use ApiActions;
+
+    public function __construct()
     {
-        //
+        $this->middleware('auth.jwt:api');
     }
 
     /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function create()
-    {
-        //
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
-    public function store(Request $request)
-    {
-        //
-    }
-
-    /**
-     * Display the specified resource.
+     * Get logged in user's details.
      *
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function show($id)
+    public function show()
     {
-        //
+        return $this->respond(Auth::user());
     }
 
     /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function edit($id)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
+     * Update a logged in user's details
      *
      * @param  \Illuminate\Http\Request  $request
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
+    public function update()
     {
-        //
-    }
+        if (!count(request()->all())) {
+            return $this->respond('No field provided');
+        }
 
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function destroy($id)
-    {
-        //
+        $username = request('username');
+
+        if (request()->has('email')) {
+            return $this->respond('You can\'t update email', 422);
+        }
+
+        if (request()->has('username') && User::where('username', $username)) {
+            return $this->respond($username.' already taken', 409);
+        }
+
+        $result = Auth::user()->update(request()->all());
+
+        if (!$result) {
+            return $this->respond('Couldn\'t update your record. Try again', 500);
+        }
+
+        return $this->respond('Record updated successfully');
     }
 }

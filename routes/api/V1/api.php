@@ -22,7 +22,6 @@ Route::get('/', function (){
 });
 
 // Authentication routes
-Route::get('/user', 'AuthController@show');
 Route::post('/login', 'AuthController@login');
 Route::post('/signup', 'AuthController@register');
 Route::get('/logout', 'AuthController@logout');
@@ -33,3 +32,7 @@ Route::get('/note/{id}', 'NoteController@show');
 Route::post('/note/create', 'NoteController@store');
 Route::patch('/note/{id}', 'NoteController@update');
 Route::delete('/note/{id}', 'NoteController@destroy');
+
+// User routes
+Route::get('/user', 'UserController@show');
+Route::post('/user/update', 'UserController@update');

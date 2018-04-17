@@ -4,7 +4,6 @@ namespace App\Http\Controllers\V1;
 
 use App\Models\Note;
 use Validator;
-use App\Models\User;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 
@@ -18,7 +17,7 @@ class NoteController extends Controller
     }
 
     /**
-     * Displays a listing of notes.
+     * Gets a listing of notes.
      *
      * @return \Illuminate\Http\Response
      */
