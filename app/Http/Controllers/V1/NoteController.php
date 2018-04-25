@@ -23,7 +23,7 @@ class NoteController extends Controller
      */
     public function index()
     {
-        $notes = Note::all(['title', 'body']);
+        $notes = Note::all(['title', 'body', 'category']);
 
         return $this->respond($notes);
     }
@@ -38,7 +38,7 @@ class NoteController extends Controller
      */
     public function store(Request $request)
     {
-        $requestBody = $request->only(['title', 'body']);
+        $requestBody = $request->only(['title', 'body', 'category']);
         $validator = Validator::make($requestBody, Note::$rules);
 
         if ($validator->fails()) {
@@ -80,7 +80,7 @@ class NoteController extends Controller
         $note = Note::find($id);
 
         if (!$note) {
-            return $this->respond('Invalid note', 404);
+            return $this->respond('Note not found', 404);
         }
 
         $result = $note->update($request->all());

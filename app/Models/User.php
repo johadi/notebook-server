@@ -16,7 +16,7 @@ class User extends Authenticatable implements JWTSubject
      * @var array
      */
     protected $fillable = [
-        'username', 'email', 'password',
+        'username', 'email', 'password', 'avatar_path'
     ];
 
     /**
@@ -50,6 +50,25 @@ class User extends Authenticatable implements JWTSubject
     public $incrementing = false;
 
     /**
+     * User model signup rules
+     * @var array
+     */
+    public static $signupRules = [
+        'email'=>'required|email',
+        'password'=>'required',
+        'username'=>'required'
+    ];
+
+    /**
+     * User model signin rules
+     * @var array
+     */
+    public static $signinRules = [
+        'email' => 'required|email',
+        'password'=>'required|min:6'
+    ];
+
+    /**
      * Get the identifier that will be stored in the subject claim of the JWT.
      *
      * @return mixed
@@ -69,8 +88,12 @@ class User extends Authenticatable implements JWTSubject
         return [];
     }
 
+    /**
+     * Defines relationship between User and Note models
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
     public function notes()
     {
-        return $this->hasMany(Note::class, 'user', 'email');
+        return $this->hasMany(Note::class, 'user_email', 'email');
     }
 }

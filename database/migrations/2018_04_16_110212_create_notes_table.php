@@ -15,10 +15,11 @@ class CreateNotesTable extends Migration
     {
         Schema::create('notes', function (Blueprint $table) {
             $table->increments('id');
-            $table->string('user');
+            $table->string('user_email');
             $table->string('title');
+            $table->string('category');
             $table->text('body');
-            $table->foreign('user')->references('email')->on('users')->onDelete('cascade');
+            $table->foreign('user_email')->references('email')->on('users')->onDelete('cascade');
             $table->timestamps();
         });
     }

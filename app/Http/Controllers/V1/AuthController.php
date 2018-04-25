@@ -22,11 +22,7 @@ class AuthController extends Controller
     public function register()
     {
         $userDetails = request()->all();
-        $validator = Validator::make($userDetails, [
-            'email'=>'required|email',
-            'password'=>'required',
-            'username'=>'required'
-        ]);
+        $validator = Validator::make($userDetails, User::$signupRules);
 
         if ($validator->fails()) {
             return response($validator->errors());
@@ -42,29 +38,26 @@ class AuthController extends Controller
 
         $userDetails['password'] = bcrypt(request('password'));
         $newUser = User::create($userDetails);
-        $token = auth()->login($newUser);
+        $token = auth()->setTTL(86400)->login($newUser);
 
         return $this->respondWithToken($token, 201);
     }
 
     /**
-     * Logins user to the application.
+     * Logs in user to the application.
      *
      * @return \Illuminate\Http\jsonResponse
      */
     public function login()
     {
         $credentials = request(['email', 'password']);
-        $validator = validator()->make($credentials, [
-            'email' => 'required|email',
-            'password'=>'required|min:6'
-        ]);
+        $validator = validator()->make($credentials, User::$signinRules);
 
         if ($validator->fails()) {
             return response($validator->messages());
         }
 
-        if (!$token = auth()->attempt($credentials)) {
+        if (!$token = auth()->setTTL(86400)->attempt($credentials)) {
             return response()
                 ->json(
                     ['error' =>

@@ -45,8 +45,10 @@ class UserController extends Controller
             return $this->respond('You can\'t update email', 422);
         }
 
-        if (request()->has('username') && User::where('username', $username)) {
-            return $this->respond($username.' already taken', 409);
+        if (request()->has('username') &&
+            User::where('username', $username)->first() &&
+            $username != auth()->user()->username) {
+            return $this->respond($username . ' already taken', 409);
         }
 
         $result = Auth::user()->update(request()->all());
