@@ -55,8 +55,9 @@ class User extends Authenticatable implements JWTSubject
      */
     public static $signupRules = [
         'email'=>'required|email',
-        'password'=>'required',
-        'username'=>'required'
+        'username'=>'required|min:2',
+        'password'=>'required|min:6',
+        'password_confirmation'=>'required'
     ];
 
     /**
@@ -67,6 +68,34 @@ class User extends Authenticatable implements JWTSubject
         'email' => 'required|email',
         'password'=>'required|min:6'
     ];
+
+    /**
+     * Change email field value to lowercase before saving to Database
+     * @param $value - value to change to lower case
+     */
+    public function setEmailAttribute($value)
+    {
+        $this->attributes['email'] = strtolower($value);
+    }
+
+    /**
+     * Changes username field value to lowercase before saving to Database
+     * @param $value - value to change to lower case
+     */
+    public function setUsernameAttribute($value)
+    {
+        $this->attributes['username'] = strtolower($value);
+    }
+
+    /**
+     * Capitalizes username when getting it from Database
+     * @param $value - $value to capitalized
+     * @return string - the capitalized username
+     */
+    public function getUsernameAttribute($value)
+    {
+        return ucfirst($value);
+    }
 
     /**
      * Get the identifier that will be stored in the subject claim of the JWT.

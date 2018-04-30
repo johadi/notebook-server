@@ -23,7 +23,7 @@ Route::get('/', function (){
 
 // Authentication routes
 Route::post('/login', 'AuthController@login');
-Route::post('/signup', 'AuthController@register');
+Route::post('/register', 'AuthController@register');
 Route::get('/logout', 'AuthController@logout');
 
 // Note routes

@@ -9,6 +9,7 @@ use App\Http\Controllers\Controller;
 class AuthController extends Controller
 {
 
+    use ApiActions;
     public function __construct()
     {
         $this->middleware(['auth.jwt:api'], ['except' => ['login', 'register']]);
@@ -24,16 +25,27 @@ class AuthController extends Controller
         $userDetails = request()->all();
         $validator = Validator::make($userDetails, User::$signupRules);
 
+        // Attach confirm validation error message to password_conformation field
+        $validator->after(function ($validator) {
+            $errors = $validator->errors();
+
+            if (request()->filled(['password', 'password_confirmation'])) {
+                if (request('password') != request('password_confirmation')) {
+                    $errors->add('password_confirmation', 'The password confirmation does not matched.');
+                }
+            }
+        });
+
         if ($validator->fails()) {
-            return response($validator->errors());
+            return $this->respond($validator->errors(), 400);
         }
 
-        $user = User::where('email', request('email'))
-            ->orWhere('username', request('username'))
+        $user = User::where('email', strtolower(request('email')))
+            ->orWhere('username', strtolower(request('username')))
             ->first();
 
         if ($user) {
-            return response('User already exists');
+            return $this->respond('User with this detail already exists', 409);
         }
 
         $userDetails['password'] = bcrypt(request('password'));
@@ -50,21 +62,20 @@ class AuthController extends Controller
      */
     public function login()
     {
-        $credentials = request(['email', 'password']);
-        $validator = validator()->make($credentials, User::$signinRules);
+        $credentials = [];
+        $validator = validator()->make(request()->all(), User::$signinRules);
 
         if ($validator->fails()) {
-            return response($validator->messages());
+            return $this->respond($validator->messages(), 400);
         }
 
+        $credentials['password'] = request('password');
+        $credentials['email'] = strtolower(request('email'));
         if (!$token = auth()->setTTL(86400)->attempt($credentials)) {
-            return response()
-                ->json(
-                    ['error' =>
-                    'This credentials don\'t match our records. Try again with the right credentials'
-                    ],
-                    401
-                );
+            return $this->respond(
+                'This credentials don\'t match our records. Try again with right credentials',
+                404
+            );
         }
 
         return $this->respondWithToken($token);
@@ -78,18 +89,7 @@ class AuthController extends Controller
     public function logout()
     {
         auth()->logout();
-        return response('Logout successful', 200);
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function show()
-    {
-        return response(auth()->payload());
+        return $this->respond('Logout successful');
     }
 
     /**
