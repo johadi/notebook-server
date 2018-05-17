@@ -17,8 +17,8 @@ use Illuminate\Http\Request;
 //    return $request->user();
 //});
 
-Route::get('/', function (){
-   return response()->json("Welcome to notebook API");
+Route::get('/', function () {
+    return response()->json("Welcome to notebook API");
 });
 
 // Authentication routes
@@ -34,5 +34,5 @@ Route::patch('/note/{id}', 'NoteController@update');
 Route::delete('/note/{id}', 'NoteController@destroy');
 
 // User routes
-Route::get('/user', 'UserController@show');
+Route::get('/user', 'UserController@get');
 Route::post('/user/update', 'UserController@update');

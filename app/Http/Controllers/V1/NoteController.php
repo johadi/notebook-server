@@ -23,7 +23,7 @@ class NoteController extends Controller
      */
     public function index()
     {
-        $notes = Note::all(['title', 'body', 'category']);
+        $notes = Note::latest('updated_at')->get();
 
         return $this->respond($notes);
     }
@@ -42,12 +42,12 @@ class NoteController extends Controller
         $validator = Validator::make($requestBody, Note::$rules);
 
         if ($validator->fails()) {
-            return $this->respond($validator->messages());
+            return $this->respond($validator->messages(), 400);
         }
 
         $newNote = auth()->user()->notes()->create($requestBody);
 
-        return $this->respond($newNote);
+        return $this->respond($newNote, 201);
     }
 
     /**
@@ -85,11 +85,12 @@ class NoteController extends Controller
 
         $result = $note->update($request->all());
 
-        if (!$result) {
-            return $this->respond('Couldn\'t update note. Try again', 500);
+        if ($result) {
+            $updatedNote = Note::find($id);
+            return $this->respond($updatedNote);
         }
 
-        return $this->respond('Note updated successfully');
+        return $this->respond('Couldn\'t update note. Try again', 500);
     }
 
     /**
