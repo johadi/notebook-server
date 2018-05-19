@@ -6,6 +6,7 @@ use App\Models\User;
 use App\Http\Controllers\Controller;
 use Auth;
 use Validator;
+use Cloudder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Storage;
@@ -66,17 +67,23 @@ class UserController extends Controller
         }
 
         if (request()->hasFile('avatar') && request('avatar')->isValid()) {
-            $storePictureResult = $this->storeProfilePicture($request);
+            $validator = Validator::make($request, ['avatar'=>'required|mimes:jpeg,jpg,png|between:1, 5000']);
 
-            if ($storePictureResult->file_status === 'invalid') {
+            if ($validator->fails()) {
+                return $this->respond($validator->messages(), 400);
+            }
+
+            $storedPictureResult = $this->storeProfilePicture($request);
+
+            if ($storedPictureResult->file_status === 'invalid') {
                 return $this->respond('File type not allowed', 400);
             }
 
-            if ($storePictureResult->file_status !== 'valid') {
+            if ($storedPictureResult->file_status !== 'valid') {
                 return $this->respond('Internal Server error. File not saved.', 500);
             }
 
-            $request['avatar_path'] = $storePictureResult->stored_file_path;
+            $request['avatar_path'] = $storedPictureResult->stored_file_path;
         }
 
         $result = Auth::user()->update($request);
@@ -99,15 +106,35 @@ class UserController extends Controller
         }
 
         $username = $request['username'] ? $request['username'] : auth()->user()->username;
-        $fileName = strtolower($username . '.' . $fileExtension);
-        $path = $file->storeAs('', $fileName, 'profile');
-        $appUrl = env('APP_ENV') === 'local' ?
-            env('APP_URL') . ':' . config('custom.appPort') :
-            env('APP_URL');
+        $imageFullPath='';
+
+        if (!env('APP_ENV') === 'local') {
+            $imageFullPath = $this->uploadToCloudinary($file, $username);
+        } else {
+            $imageFullPath = $this->savePictureLocally($file, $username);
+        }
 
         return (object)[
             'file_status' => 'valid',
-            'stored_file_path' => 'storage/profile_pictures/' . $path
+            'stored_file_path' => $imageFullPath
         ];
+    }
+
+    private function uploadToCloudinary($file, $username)
+    {
+        $publicId = strtolower('notebook/profile_pictures/'.$username);
+        Cloudder::upload($file, $publicId, ['width' => 250, 'height'=>250]);
+        $uploadResult = (object)Cloudder::getResult();
+
+        return $uploadResult->secure_url;
+    }
+
+    private function savePictureLocally($file, $username)
+    {
+        $appUrl = env('APP_URL') . ':' . config('custom.appPort');
+        $fileName = strtolower($username . '.' . strtolower($file->extension()));
+        $path = $file->storeAs('', $fileName, 'profile');
+
+        return $appUrl. '/storage/profile_pictures/' . $path;
     }
 }

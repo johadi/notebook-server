@@ -73,7 +73,7 @@ class AuthController extends Controller
         $credentials['email'] = strtolower(request('email'));
         if (!$token = auth()->setTTL(86400)->attempt($credentials)) {
             return $this->respond(
-                'This credentials don\'t match our records. Try again with right credentials',
+                'This credentials don\'t match our records.',
                 404
             );
         }
