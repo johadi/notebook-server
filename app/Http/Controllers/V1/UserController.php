@@ -67,7 +67,7 @@ class UserController extends Controller
         }
 
         if (request()->hasFile('avatar') && request('avatar')->isValid()) {
-            $validator = Validator::make($request, ['avatar'=>'required|mimes:jpeg,jpg,png|between:1, 5000']);
+            $validator = Validator::make($request, ['avatar'=>'required|mimes:jpeg,jpg,png|between:1, 10000']);
 
             if ($validator->fails()) {
                 return $this->respond($validator->messages(), 400);
@@ -108,7 +108,7 @@ class UserController extends Controller
         $username = $request['username'] ? $request['username'] : auth()->user()->username;
         $imageFullPath='';
 
-        if (!env('APP_ENV') === 'local') {
+        if (env('APP_ENV') !== 'local') {
             $imageFullPath = $this->uploadToCloudinary($file, $username);
         } else {
             $imageFullPath = $this->savePictureLocally($file, $username);
