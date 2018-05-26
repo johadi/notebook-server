@@ -23,8 +23,8 @@ class NoteController extends Controller
      */
     public function index()
     {
-         $notes = Note::latest('updated_at')->paginate(15);
-//        $notes = auth()->user()->notes()->latest('updated_at')->paginate(8);
+//         $notes = Note::latest('updated_at')->paginate(15);
+        $notes = auth()->user()->notes()->latest('updated_at')->paginate(15);
 
         return $this->respond($notes);
     }
