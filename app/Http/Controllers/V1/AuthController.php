@@ -50,7 +50,7 @@ class AuthController extends Controller
 
         $userDetails['password'] = bcrypt(request('password'));
         $newUser = User::create($userDetails);
-        $token = auth()->setTTL(86400)->login($newUser);
+        $token = auth()->setTTL(10080)->login($newUser);
 
         return $this->respondWithToken($token, 201);
     }
@@ -71,7 +71,7 @@ class AuthController extends Controller
 
         $credentials['password'] = request('password');
         $credentials['email'] = strtolower(request('email'));
-        if (!$token = auth()->setTTL(86400)->attempt($credentials)) {
+        if (!$token = auth()->setTTL(10080)->attempt($credentials)) {
             return $this->respond(
                 'This credentials don\'t match our records.',
                 404
