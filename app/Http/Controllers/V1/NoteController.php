@@ -84,6 +84,13 @@ class NoteController extends Controller
             return $this->respond('Note not found', 404);
         }
 
+        $requestBody = $request->only(['title', 'body', 'category']);
+        $validator = Validator::make($requestBody, Note::$rules);
+
+        if ($validator->fails()) {
+            return $this->respond($validator->messages(), 400);
+        }
+
         $result = $note->update($request->all());
 
         if ($result) {
@@ -114,6 +121,6 @@ class NoteController extends Controller
         if (!$result) {
             return $this->respond('Couldn\'t delete note. Try again', 500);
         }
-        return $this->respond('Note deleted successfully');
+        return $this->respond('Note deleted successfully', 200);
     }
 }

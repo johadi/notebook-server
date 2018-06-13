@@ -45,7 +45,7 @@ class AuthController extends Controller
             ->first();
 
         if ($user) {
-            return $this->respond('User with this detail already exists', 409);
+            return $this->respond('User with these details already exists', 409);
         }
 
         $userDetails['password'] = bcrypt(request('password'));
@@ -73,7 +73,7 @@ class AuthController extends Controller
         $credentials['email'] = strtolower(request('email'));
         if (!$token = auth()->setTTL(10080)->attempt($credentials)) {
             return $this->respond(
-                'This credentials don\'t match our records.',
+                'These credentials don\'t match our records.',
                 404
             );
         }
