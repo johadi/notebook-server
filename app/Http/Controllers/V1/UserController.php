@@ -67,7 +67,7 @@ class UserController extends Controller
         }
 
         if (request()->hasFile('avatar') && request('avatar')->isValid()) {
-            $validator = Validator::make($request, ['avatar'=>'required|mimes:jpeg,jpg,png|between:1, 10000']);
+            $validator = Validator::make($request, ['avatar'=>'required|mimes:jpeg,jpg,png|between:1, 2000']);
 
             if ($validator->fails()) {
                 return $this->respond($validator->messages(), 400);
